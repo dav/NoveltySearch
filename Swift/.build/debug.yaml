@@ -1,0 +1,81 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "NoveltySearch-arm64-apple-macosx26.0-debug.exe": ["<NoveltySearch-arm64-apple-macosx26.0-debug.exe>"]
+  "NoveltySearch-arm64-apple-macosx26.0-debug.module": ["<NoveltySearch-arm64-apple-macosx26.0-debug.module>"]
+  "PackageStructure": ["<PackageStructure>"]
+  "main": ["<NoveltySearch-arm64-apple-macosx26.0-debug.exe>","<NoveltySearch-arm64-apple-macosx26.0-debug.module>"]
+  "test": ["<NoveltySearch-arm64-apple-macosx26.0-debug.exe>","<NoveltySearch-arm64-apple-macosx26.0-debug.module>"]
+default: "main"
+nodes:
+  "/Users/dav/code/NoveltySearch/Swift/Sources/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch":
+    is-mutated: true
+commands:
+  "/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch-entitlement.plist":
+    tool: write-auxiliary-file
+    inputs: ["<entitlement-plist>","<com.apple.security.get-task-allow>"]
+    outputs: ["/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch-entitlement.plist"]
+    description: "Write auxiliary file /Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch-entitlement.plist"
+
+  "/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/dav/code/NoveltySearch/Swift/Sources/AppState.swift","/Users/dav/code/NoveltySearch/Swift/Sources/ContentView.swift","/Users/dav/code/NoveltySearch/Swift/Sources/ControlsSidebar.swift","/Users/dav/code/NoveltySearch/Swift/Sources/Evolution.swift","/Users/dav/code/NoveltySearch/Swift/Sources/Maze.swift","/Users/dav/code/NoveltySearch/Swift/Sources/MazeCanvas.swift","/Users/dav/code/NoveltySearch/Swift/Sources/Network.swift","/Users/dav/code/NoveltySearch/Swift/Sources/NoveltySearchApp.swift","/Users/dav/code/NoveltySearch/Swift/Sources/NoveltySearchEngine.swift","/Users/dav/code/NoveltySearch/Swift/Sources/Robot.swift"]
+    outputs: ["/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/sources"]
+    description: "Write auxiliary file /Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/sources"
+
+  "/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/AppState.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/ContentView.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/ControlsSidebar.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Evolution.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Maze.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/MazeCanvas.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Network.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/NoveltySearchApp.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/NoveltySearchEngine.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Robot.swift.o"]
+    outputs: ["/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.product/Objects.LinkFileList"
+
+  "/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"]
+    outputs: ["/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+
+  "<NoveltySearch-arm64-apple-macosx26.0-debug.exe>":
+    tool: phony
+    inputs: ["<NoveltySearch-arm64-apple-macosx26.0-debug.exe-CodeSigning>"]
+    outputs: ["<NoveltySearch-arm64-apple-macosx26.0-debug.exe>"]
+
+  "<NoveltySearch-arm64-apple-macosx26.0-debug.module>":
+    tool: phony
+    inputs: ["/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/AppState.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/ContentView.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/ControlsSidebar.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Evolution.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Maze.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/MazeCanvas.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Network.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/NoveltySearchApp.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/NoveltySearchEngine.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Robot.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/Modules/NoveltySearch.swiftmodule"]
+    outputs: ["<NoveltySearch-arm64-apple-macosx26.0-debug.module>"]
+
+  "C.NoveltySearch-arm64-apple-macosx26.0-debug.exe":
+    tool: shell
+    inputs: ["/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/AppState.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/ContentView.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/ControlsSidebar.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Evolution.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Maze.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/MazeCanvas.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Network.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/NoveltySearchApp.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/NoveltySearchEngine.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Robot.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.product/Objects.LinkFileList"]
+    outputs: ["/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/NoveltySearch"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-L","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug","-o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch","-module-name","NoveltySearch","-Xlinker","-no_warn_duplicate_libraries","-emit-executable","-Xlinker","-alias","-Xlinker","_NoveltySearch_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.product/Objects.LinkFileList","-Xlinker","-rpath","-Xlinker","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-6.2/macosx","-target","arm64-apple-macosx14.0","-Xlinker","-add_ast_path","-Xlinker","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/Modules/NoveltySearch.swiftmodule","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g"]
+
+  "C.NoveltySearch-arm64-apple-macosx26.0-debug.exe-entitlements":
+    tool: shell
+    inputs: ["/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch-entitlement.plist"]
+    outputs: ["<NoveltySearch-arm64-apple-macosx26.0-debug.exe-CodeSigning>"]
+    description: "Applying debug entitlements to ./.build/arm64-apple-macosx/debug/NoveltySearch"
+    args: ["codesign","--force","--sign","-","--entitlements","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch-entitlement.plist","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch"]
+
+  "C.NoveltySearch-arm64-apple-macosx26.0-debug.module":
+    tool: shell
+    inputs: ["/Users/dav/code/NoveltySearch/Swift/Sources/AppState.swift","/Users/dav/code/NoveltySearch/Swift/Sources/ContentView.swift","/Users/dav/code/NoveltySearch/Swift/Sources/ControlsSidebar.swift","/Users/dav/code/NoveltySearch/Swift/Sources/Evolution.swift","/Users/dav/code/NoveltySearch/Swift/Sources/Maze.swift","/Users/dav/code/NoveltySearch/Swift/Sources/MazeCanvas.swift","/Users/dav/code/NoveltySearch/Swift/Sources/Network.swift","/Users/dav/code/NoveltySearch/Swift/Sources/NoveltySearchApp.swift","/Users/dav/code/NoveltySearch/Swift/Sources/NoveltySearchEngine.swift","/Users/dav/code/NoveltySearch/Swift/Sources/Robot.swift","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/sources"]
+    outputs: ["/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/AppState.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/ContentView.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/ControlsSidebar.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Evolution.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Maze.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/MazeCanvas.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Network.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/NoveltySearchApp.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/NoveltySearchEngine.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/Robot.swift.o","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/Modules/NoveltySearch.swiftmodule"]
+    description: "Compiling Swift Module 'NoveltySearch' (10 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","NoveltySearch","-emit-dependencies","-emit-module","-emit-module-path","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/Modules/NoveltySearch.swiftmodule","-output-file-map","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/output-file-map.json","-incremental","-c","@/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/NoveltySearch.build/sources","-I","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx14.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j14","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/dav/code/NoveltySearch/Swift/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","NoveltySearch_main","-color-diagnostics","-swift-version","5","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","swift"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/dav/code/NoveltySearch/Swift/Sources/","/Users/dav/code/NoveltySearch/Swift/Package.swift","/Users/dav/code/NoveltySearch/Swift/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+

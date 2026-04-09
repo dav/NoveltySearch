@@ -1,6 +1,6 @@
 # Novelty Search
 
-A Rust implementation of novelty search applied to maze navigation, inspired by Joel Lehman's paper on abandoning objectives in evolutionary algorithms.
+Rust and Swift implementations of novelty search applied to maze navigation, inspired by Joel Lehman's paper on abandoning objectives in evolutionary algorithms.
 
 A robot equipped with rangefinder sensors navigates mazes using a small feedforward neural network (11 inputs, 5 hidden, 2 outputs). The app provides an interactive [egui](https://github.com/emilk/egui) visualization with four control modes:
 
@@ -23,10 +23,11 @@ Lehman, J. and Stanley, K.O. (2011). [Abandoning Objectives: Evolution Through t
 
 - [Rust](https://www.rust-lang.org/tools/install) (edition 2024)
 
-### Clone and Run
+### Run
 
 ```bash
-cd NoveltySearch/novelty-search && cargo run
+make run-rust
+make run-swift
 ```
 
 The interesting bit, imo, is comparing the performance of Eller mazes between Evolve and
