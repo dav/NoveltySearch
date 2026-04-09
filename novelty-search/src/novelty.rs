@@ -15,13 +15,13 @@ const INITIAL_RHO_MIN: f64 = 6.0;
 /// The novelty search state.
 pub struct NoveltySearch {
     population: Vec<Network>,
-    novelty_scores: Vec<f64>,
+    pub novelty_scores: Vec<f64>,
     pub generation: u32,
     pub total_evaluations: u32,
 
-    // Behavior archive — stores final (x, y) positions of novel individuals
-    pub archive: Vec<(f64, f64)>,
-    rho_min: f64,
+    // Behavior archive — stores final (x, y) positions + generation added
+    pub archive: Vec<((f64, f64), u32)>,
+    pub rho_min: f64,
     evals_since_last_addition: u32,
 
     // Per-generation data for visualization
@@ -32,6 +32,10 @@ pub struct NoveltySearch {
     pub best_trajectory: Vec<(f64, f64)>,
     pub closest_distance: f64,
     pub solved: bool,
+
+    // Last generation summary (for UI)
+    pub last_gen_archive_additions: u32,
+    pub last_gen_closest_dist: f64,
 }
 
 impl NoveltySearch {
@@ -51,6 +55,8 @@ impl NoveltySearch {
             best_trajectory: Vec::new(),
             closest_distance: f64::INFINITY,
             solved: false,
+            last_gen_archive_additions: 0,
+            last_gen_closest_dist: f64::INFINITY,
         }
     }
 
@@ -87,7 +93,7 @@ impl NoveltySearch {
 
             // Check if this individual should be added to the archive
             if novelty > self.rho_min {
-                self.archive.push(final_positions[i]);
+                self.archive.push((final_positions[i], self.generation));
                 additions_this_gen += 1;
             }
 
@@ -98,6 +104,10 @@ impl NoveltySearch {
                 closest_idx = i;
             }
         }
+
+        // Store generation summary for UI
+        self.last_gen_archive_additions = additions_this_gen;
+        self.last_gen_closest_dist = closest_dist;
 
         // Update best-ever closest to goal
         if closest_dist < self.closest_distance {
@@ -165,7 +175,7 @@ impl NoveltySearch {
             }
         }
 
-        for &archived in &self.archive {
+        for &(archived, _) in &self.archive {
             distances.push(distance(point, archived));
         }
 

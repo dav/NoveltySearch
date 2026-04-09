@@ -57,6 +57,7 @@ struct App {
     novelty_gens_per_frame: u32,
     novelty_replay_trajectory: Vec<(f64, f64)>,
     novelty_replay_index: usize,
+    novelty_step_one: bool,
 }
 
 impl App {
@@ -85,6 +86,7 @@ impl App {
             novelty_gens_per_frame: 1,
             novelty_replay_trajectory: Vec::new(),
             novelty_replay_index: 0,
+            novelty_step_one: false,
         }
     }
 
@@ -105,6 +107,7 @@ impl App {
     fn reset_novelty(&mut self) {
         self.novelty_search = NoveltySearch::new();
         self.novelty_running = false;
+        self.novelty_step_one = false;
         self.novelty_replay_trajectory.clear();
         self.novelty_replay_index = 0;
     }
@@ -180,6 +183,12 @@ impl eframe::App for App {
                 }
             }
             Mode::Novelty => {
+                if self.novelty_step_one && !self.novelty_search.solved {
+                    self.novelty_search.step_generation(&self.maze);
+                    self.novelty_step_one = false;
+                    self.novelty_replay_trajectory = self.novelty_search.best_trajectory.clone();
+                    self.novelty_replay_index = self.novelty_replay_trajectory.len();
+                }
                 if self.novelty_running && !self.novelty_search.solved {
                     for _ in 0..self.novelty_gens_per_frame {
                         self.novelty_search.step_generation(&self.maze);
@@ -325,8 +334,13 @@ impl eframe::App for App {
                         if ui.button("Pause").clicked() {
                             self.novelty_running = false;
                         }
-                    } else if ui.button("Start").clicked() {
-                        self.novelty_running = true;
+                    } else {
+                        if ui.button("Start").clicked() {
+                            self.novelty_running = true;
+                        }
+                        if ui.button("Step 1 gen").clicked() {
+                            self.novelty_step_one = true;
+                        }
                     }
                     if ui.button("Reset").clicked() {
                         self.reset_novelty();
@@ -353,6 +367,21 @@ impl eframe::App for App {
                 ui.label(format!("Evaluations: {}", self.novelty_search.total_evaluations));
                 ui.label(format!("Archive size: {}", self.novelty_search.archive.len()));
                 ui.label(format!("Closest to goal: {:.1}", self.novelty_search.closest_distance));
+                ui.label(format!("Threshold (\u{03c1}_min): {:.2}", self.novelty_search.rho_min));
+
+                if self.novelty_search.generation > 0 {
+                    ui.separator();
+                    ui.heading("Last Generation");
+                    ui.label(format!(
+                        "Archived: +{} (total: {})",
+                        self.novelty_search.last_gen_archive_additions,
+                        self.novelty_search.archive.len()
+                    ));
+                    ui.label(format!(
+                        "Closest to goal: {:.1}",
+                        self.novelty_search.last_gen_closest_dist
+                    ));
+                }
 
                 // Novelty score plot
                 if !self.novelty_search.best_novelty_history.is_empty() {
@@ -504,16 +533,36 @@ impl eframe::App for App {
 
             // Draw novelty search data
             if self.mode == Mode::Novelty {
-                // Draw archive points (purple) — the accumulated history of novel behaviors
-                for &pos in &self.novelty_search.archive {
+                // Draw archive points colored by age (faded = old, vivid = new)
+                let max_gen = self.novelty_search.generation.max(1) as f32;
+                for &(pos, added_gen) in &self.novelty_search.archive {
+                    let t = added_gen as f32 / max_gen;
+                    let r = (180.0 - 20.0 * t) as u8;
+                    let g = (140.0 - 90.0 * t) as u8;
+                    let b = (200.0 + 55.0 * t) as u8;
+                    let alpha = (80.0 + 140.0 * t) as u8;
                     let p = to_screen(pos.0, pos.1);
-                    painter.circle_filled(p, 2.5, egui::Color32::from_rgba_premultiplied(160, 80, 220, 180));
+                    painter.circle_filled(p, 2.5, egui::Color32::from_rgba_premultiplied(r, g, b, alpha));
                 }
 
-                // Draw current generation final positions (orange)
-                for &pos in &self.novelty_search.all_final_positions {
-                    let p = to_screen(pos.0, pos.1);
-                    painter.circle_filled(p, 2.0, egui::Color32::from_rgba_premultiplied(255, 160, 50, 200));
+                // Draw current generation final positions colored by novelty score
+                if !self.novelty_search.all_final_positions.is_empty() {
+                    let scores = &self.novelty_search.novelty_scores;
+                    let positions = &self.novelty_search.all_final_positions;
+                    let min_s = scores.iter().cloned().fold(f64::INFINITY, f64::min);
+                    let max_s = scores.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+                    let range = (max_s - min_s).max(1e-10);
+
+                    for (pos, &score) in positions.iter().zip(scores.iter()) {
+                        let t = ((score - min_s) / range) as f32;
+                        let r = (120.0 + 135.0 * t) as u8;
+                        let g = (70.0 + 150.0 * t) as u8;
+                        let b = (30.0 + 20.0 * t) as u8;
+                        let alpha = (100.0 + 130.0 * t) as u8;
+                        let size = 1.5 + 3.5 * t;
+                        let p = to_screen(pos.0, pos.1);
+                        painter.circle_filled(p, size, egui::Color32::from_rgba_premultiplied(r, g, b, alpha));
+                    }
                 }
 
                 // Draw trajectory trail for closest-to-goal robot
