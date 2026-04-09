@@ -11,6 +11,8 @@ A robot equipped with rangefinder sensors navigates mazes using a small feedforw
 
 Three maze environments are included: Medium, Hard, and a procedurally generated Eller maze.
 
+<img width="880" height="625" alt="image" src="https://github.com/user-attachments/assets/c46c1a26-8125-4523-a830-6129cdcd45e7" />
+
 ## Paper
 
 Lehman, J. and Stanley, K.O. (2011). [Abandoning Objectives: Evolution Through the Search for Novelty Alone](https://www.cs.swarthmore.edu/~meeden/DevelopmentalRobotics/lehman_ecj11.pdf). *Evolutionary Computation*, 19(2), 189-223.
