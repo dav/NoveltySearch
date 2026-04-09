@@ -28,3 +28,6 @@ git clone <repo-url>
 cd NoveltySearch/novelty-search
 cargo run
 ```
+
+The interesting bit, imo, is comparing the performance of Eller mazes between Evolve and
+Novelty modes. Sometimes the Evolve mode gets stuck with no progress apaprently ever to be made again, but I've never seend the Novelty algorithm get stuck.
