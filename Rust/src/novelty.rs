@@ -1,16 +1,17 @@
 use rand::Rng;
 
+use crate::explainer::{GenerationSnapshot, IndividualSnapshot, Recording};
 use crate::maze::Maze;
 use crate::network::Network;
 use crate::robot::Robot;
 
-const POPULATION_SIZE: usize = 150;
-const TIMESTEPS: u32 = 400;
-const MUTATION_SIGMA: f64 = 0.1;
-const TOURNAMENT_SIZE: usize = 3;
-const SUCCESS_DISTANCE: f64 = 5.0;
-const K_NEAREST: usize = 15;
-const INITIAL_RHO_MIN: f64 = 6.0;
+pub const POPULATION_SIZE: usize = 150;
+pub const TIMESTEPS: u32 = 400;
+pub const MUTATION_SIGMA: f64 = 0.1;
+pub const TOURNAMENT_SIZE: usize = 3;
+pub const SUCCESS_DISTANCE: f64 = 5.0;
+pub const K_NEAREST: usize = 15;
+pub const INITIAL_RHO_MIN: f64 = 6.0;
 
 /// The novelty search state.
 pub struct NoveltySearch {
@@ -31,11 +32,16 @@ pub struct NoveltySearch {
     // Best individual that reached closest to goal (tracked but not used for selection)
     pub best_trajectory: Vec<(f64, f64)>,
     pub closest_distance: f64,
+    pub closest_generation: u32,
+    pub closest_individual_idx: usize,
     pub solved: bool,
 
     // Last generation summary (for UI)
     pub last_gen_archive_additions: u32,
     pub last_gen_closest_dist: f64,
+
+    // Full per-generation recording for the explainer export.
+    pub recording: Recording,
 }
 
 impl NoveltySearch {
@@ -54,14 +60,22 @@ impl NoveltySearch {
             best_novelty_history: Vec::new(),
             best_trajectory: Vec::new(),
             closest_distance: f64::INFINITY,
+            closest_generation: 0,
+            closest_individual_idx: 0,
             solved: false,
             last_gen_archive_additions: 0,
             last_gen_closest_dist: f64::INFINITY,
+            recording: Recording::default(),
         }
     }
 
     /// Run one generation of novelty search. Returns true if any robot reached the goal.
     pub fn step_generation(&mut self, maze: &Maze) -> bool {
+        let rho_min_before = self.rho_min;
+
+        // Snapshot the current population's weights BEFORE selection/mutation replaces them.
+        let population_weights: Vec<Network> = self.population.clone();
+
         // Evaluate all individuals — run each robot, record final position
         let mut final_positions = Vec::with_capacity(POPULATION_SIZE);
         let mut trajectories = Vec::with_capacity(POPULATION_SIZE);
@@ -79,9 +93,10 @@ impl NoveltySearch {
         // Compute novelty score for each individual
         // Novelty = average distance to k-nearest neighbors in (population + archive)
         let mut best_novelty = f64::NEG_INFINITY;
-        let mut additions_this_gen = 0;
+        let mut additions_this_gen = 0u32;
         let mut closest_idx = 0;
         let mut closest_dist = f64::INFINITY;
+        let mut archived_mask = vec![false; POPULATION_SIZE];
 
         for i in 0..POPULATION_SIZE {
             let novelty = self.compute_novelty(final_positions[i], &final_positions);
@@ -95,6 +110,7 @@ impl NoveltySearch {
             if novelty > self.rho_min {
                 self.archive.push((final_positions[i], self.generation));
                 additions_this_gen += 1;
+                archived_mask[i] = true;
             }
 
             // Track closest to goal (not used for selection, just for reporting)
@@ -112,14 +128,17 @@ impl NoveltySearch {
         // Update best-ever closest to goal
         if closest_dist < self.closest_distance {
             self.closest_distance = closest_dist;
+            self.closest_generation = self.generation;
+            self.closest_individual_idx = closest_idx;
             self.best_trajectory = trajectories[closest_idx].clone();
         }
 
-        // Check if solved
-        if closest_dist <= SUCCESS_DISTANCE {
+        let solved_now = closest_dist <= SUCCESS_DISTANCE;
+        if solved_now {
             self.solved = true;
+            self.closest_generation = self.generation;
+            self.closest_individual_idx = closest_idx;
             self.best_trajectory = trajectories[closest_idx].clone();
-            return true;
         }
 
         self.best_novelty_history.push(best_novelty);
@@ -138,9 +157,6 @@ impl NoveltySearch {
             }
         }
 
-        // Selection and reproduction (same GA, but using novelty scores)
-        let mut new_population = Vec::with_capacity(POPULATION_SIZE);
-
         // Elitism: keep the individual with the highest novelty
         let elite_idx = self.novelty_scores
             .iter()
@@ -148,17 +164,47 @@ impl NoveltySearch {
             .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
             .map(|(i, _)| i)
             .unwrap_or(0);
+
+        // Selection and reproduction (same GA, but using novelty scores).
+        // We still run selection on the solved generation so the recording is uniform;
+        // the new population is simply unused once `solved` is true.
+        let mut new_population = Vec::with_capacity(POPULATION_SIZE);
         new_population.push(self.population[elite_idx].clone());
 
-        // Fill the rest with tournament selection + mutation
+        let mut tournament_winners = Vec::with_capacity(POPULATION_SIZE - 1);
         let mut rng = rand::rng();
         while new_population.len() < POPULATION_SIZE {
             let winner = self.tournament_select(&mut rng);
+            tournament_winners.push(winner);
             new_population.push(self.population[winner].mutated(MUTATION_SIGMA));
         }
 
+        // Record this generation for the explainer export.
+        let individuals: Vec<IndividualSnapshot> = (0..POPULATION_SIZE)
+            .map(|i| IndividualSnapshot {
+                weights: population_weights[i].clone(),
+                trajectory: trajectories[i].clone(),
+                final_position: final_positions[i],
+                novelty_score: self.novelty_scores[i],
+                archived: archived_mask[i],
+            })
+            .collect();
+
+        self.recording.generations.push(GenerationSnapshot {
+            generation: self.generation,
+            rho_min_before,
+            rho_min_after: self.rho_min,
+            archive_additions: additions_this_gen,
+            best_novelty,
+            elite_idx,
+            closest_idx,
+            closest_distance: closest_dist,
+            individuals,
+            tournament_winners,
+        });
+
         self.population = new_population;
-        false
+        solved_now
     }
 
     /// Compute novelty of a behavior point: average distance to k-nearest neighbors

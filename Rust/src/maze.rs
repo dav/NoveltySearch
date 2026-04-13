@@ -1,12 +1,14 @@
+use serde::Serialize;
+
 /// A wall is a line segment between two points.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Wall {
     pub a: (f64, f64),
     pub b: (f64, f64),
 }
 
 /// A maze with walls, a start position, a goal position, and bounding dimensions.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Maze {
     pub walls: Vec<Wall>,
     pub start: (f64, f64),

@@ -1,4 +1,5 @@
 mod evolution;
+mod explainer;
 mod maze;
 mod network;
 mod novelty;
@@ -58,6 +59,9 @@ struct App {
     novelty_replay_trajectory: Vec<(f64, f64)>,
     novelty_replay_index: usize,
     novelty_step_one: bool,
+
+    // Last export status (path on success, error message on failure).
+    explainer_export_message: Option<Result<std::path::PathBuf, String>>,
 }
 
 impl App {
@@ -87,6 +91,7 @@ impl App {
             novelty_replay_trajectory: Vec::new(),
             novelty_replay_index: 0,
             novelty_step_one: false,
+            explainer_export_message: None,
         }
     }
 
@@ -110,6 +115,7 @@ impl App {
         self.novelty_step_one = false;
         self.novelty_replay_trajectory.clear();
         self.novelty_replay_index = 0;
+        self.explainer_export_message = None;
     }
 
     fn switch_maze(&mut self, choice: MazeChoice) {
@@ -381,6 +387,40 @@ impl eframe::App for App {
                         "Closest to goal: {:.1}",
                         self.novelty_search.last_gen_closest_dist
                     ));
+                }
+
+                // Explainer export
+                ui.separator();
+                ui.heading("Explainer export");
+                let have_data = self.novelty_search.generation > 0;
+                ui.add_enabled_ui(have_data, |ui| {
+                    if ui.button("Export run to JSON").clicked() {
+                        let path = explainer::default_export_path();
+                        let result = explainer::write_export(
+                            &self.novelty_search,
+                            &self.maze,
+                            &path,
+                        );
+                        self.explainer_export_message = Some(match result {
+                            Ok(()) => {
+                                let abs = std::fs::canonicalize(&path).unwrap_or(path);
+                                Ok(abs)
+                            }
+                            Err(e) => Err(e.to_string()),
+                        });
+                    }
+                });
+                if !have_data {
+                    ui.small("Run at least one generation first.");
+                }
+                match &self.explainer_export_message {
+                    Some(Ok(path)) => {
+                        ui.small(format!("Wrote: {}", path.display()));
+                    }
+                    Some(Err(e)) => {
+                        ui.colored_label(egui::Color32::RED, format!("Export failed: {}", e));
+                    }
+                    None => {}
                 }
 
                 // Novelty score plot

@@ -1,8 +1,9 @@
 use rand::Rng;
+use serde::Serialize;
 
 /// A simple feedforward neural network: 11 inputs → 5 hidden (tanh) → 2 outputs (tanh).
 /// Used to map sensor inputs to (angular_velocity, speed).
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct Network {
     /// Weights from input to hidden layer (5 × 11 = 55 weights)
     pub w_ih: [[f64; 11]; 5],
@@ -12,6 +13,17 @@ pub struct Network {
     pub w_ho: [[f64; 5]; 2],
     /// Output layer biases (2)
     pub b_o: [f64; 2],
+}
+
+/// One forward-pass of the network, with all intermediate activations preserved.
+/// Used by the explainer to show per-step NN state during narration.
+#[derive(Clone, Serialize)]
+pub struct ForwardTrace {
+    pub inputs: [f64; 11],
+    pub hidden: [f64; 5],
+    pub outputs: [f64; 2],
+    pub ang_vel: f64,
+    pub speed: f64,
 }
 
 impl Network {
@@ -74,6 +86,39 @@ impl Network {
         let speed = (output[1] + 1.0) / 2.0 * 3.0; // map [-1,1] to [0, 3]
 
         (ang_vel, speed)
+    }
+
+    /// Forward pass that returns all intermediate activations.
+    /// Equivalent to `forward` but preserves per-layer values for the explainer.
+    pub fn forward_with_activations(&self, inputs: &[f64; 11]) -> ForwardTrace {
+        let mut hidden = [0.0; 5];
+        for (h, (weights, bias)) in hidden.iter_mut().zip(self.w_ih.iter().zip(self.b_h.iter())) {
+            let mut sum = *bias;
+            for (w, x) in weights.iter().zip(inputs.iter()) {
+                sum += w * x;
+            }
+            *h = sum.tanh();
+        }
+
+        let mut outputs = [0.0; 2];
+        for (o, (weights, bias)) in outputs.iter_mut().zip(self.w_ho.iter().zip(self.b_o.iter())) {
+            let mut sum = *bias;
+            for (w, h) in weights.iter().zip(hidden.iter()) {
+                sum += w * h;
+            }
+            *o = sum.tanh();
+        }
+
+        let ang_vel = outputs[0] * 0.3;
+        let speed = (outputs[1] + 1.0) / 2.0 * 3.0;
+
+        ForwardTrace {
+            inputs: *inputs,
+            hidden,
+            outputs,
+            ang_vel,
+            speed,
+        }
     }
 
     /// Return a mutated copy of this network.
